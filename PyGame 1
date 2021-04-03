@@ -1,0 +1,231 @@
+# Install
+import pygame
+import random
+import math
+
+# currently stuck on the for loop placing list of enemies
+# not exactly sure where to go, getting an error for the index
+
+# Initialize
+pygame.init()
+
+# create screen
+screen = pygame.display.set_mode((800, 600))
+
+# Background
+background = pygame.image.load('groomed.png')
+
+# Title and Icon
+pygame.display.set_caption("YYYYEEEEWWWW")
+
+# Player
+playerIMG = pygame.image.load('snowboard.png')
+pygame.display.set_icon(playerIMG)
+playerX = 370
+playerY = 100
+playerX_change = 0
+playerY_change = 0
+
+# Snowball
+snowballIMG = pygame.image.load('snowball.png')
+pygame.display.set_icon(snowballIMG)
+snowballX = 0
+snowballY = 0
+snowball_state = "Ready"
+
+# Obstacles / Enemies
+
+# Tree
+treeIMG = []
+treeX = []
+treeY = []
+treeX_change = []
+treeY_change = []
+num_of_trees = 10
+
+for i in range(num_of_trees):
+    treeIMG.append(pygame.image.load('001-christmas-tree.png'))
+    treeX.append(random.randint(0, 800))
+    treeY.append(600)
+
+mooseIMG = pygame.image.load('006-moose.png')
+pygame.display.set_icon(mooseIMG)
+mooseX = -50
+mooseY = random.randint(100, 500)
+
+wolfIMG = pygame.image.load('wolf.png')
+pygame.display.set_icon(wolfIMG)
+wolfX = -50
+wolfY = random.randint(100, 500)
+
+deerIMG = pygame.image.load('deer.png')
+pygame.display.set_icon(deerIMG)
+deerX = -50
+deerY = random.randint(100, 500)
+
+hareIMG = pygame.image.load('hare.png')
+pygame.display.set_icon(hareIMG)
+hareX = -50
+hareY = random.randint(100, 500)
+
+pumaIMG = pygame.image.load('puma.png')
+pygame.display.set_icon(pumaIMG)
+pumaX = -50
+pumaY = random.randint(100, 500)
+
+foxIMG = pygame.image.load('fox.png')
+pygame.display.set_icon(foxIMG)
+foxX = -50
+foxY = random.randint(100, 500)
+
+# Moving our boundaries, enemies, snowballs
+treeX_change.append(0)
+treeY_change.append(-0.2)
+
+mooseX_change = 0.4
+
+snowballX_change = 0
+snowballY_change = 0.5
+
+# Placing the player in a specific spot
+# blit means draw
+
+score = 0
+
+
+def player(x, y):
+    screen.blit(playerIMG, (x, y))
+
+
+def tree(x, y, i):
+    screen.blit(treeIMG[i], (x, y))
+
+
+def moose(x, y):
+    screen.blit(mooseIMG, (x, y))
+
+
+def fire_snowball(x, y):
+    screen.blit(snowballIMG, (x + 16, y + 10))
+
+
+def iscollision(mooseX, mooseY, snowballX, snowballY):
+    distance = math.sqrt((math.pow(mooseX - snowballX, 2)) + (math.pow(mooseY - snowballY, 2)))
+    if distance < 27:
+        return True
+    else:
+        return False
+
+
+# Game Loop
+running = True
+while running:
+
+    # Background: RGB - Red, Green, Blue
+    screen.fill((255, 255, 255))
+
+    # Background Image
+    # screen.blit(background, (0, 0))
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+        # if a keystroke is pressed, check whether its right or left
+        if event.type == pygame.KEYDOWN:
+            # print("A key was pressed")
+            if event.key == pygame.K_LEFT:
+                # print("Left was pressed")
+                playerX_change = -0.3
+            if event.key == pygame.K_RIGHT:
+                # print("Right was pressed")
+                playerX_change = 0.3
+            if event.key == pygame.K_UP:
+                # print("Up was pressed")
+                playerY_change = -0.3
+            if event.key == pygame.K_DOWN:
+                # print("Down was pressed")
+                playerY_change = 0.3
+            if snowball_state == "Ready":
+                if event.key == pygame.K_SPACE:
+                    # print("Space was Pressed")
+                    snowball_state = "Fire"
+                    fire_snowball(snowballX, snowballY)
+                    snowballY = playerY
+                    snowballX = playerX
+            if snowballY >= 500:
+                snowball_state = "Ready"
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT or event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                # print("Key has been released")
+                playerX_change = 0
+                playerY_change = 0
+
+    # Movement and Boundaries
+    # player
+    playerX += playerX_change
+    playerY += playerY_change
+
+    if playerX <= 0:
+        playerX = 0
+    elif playerX >= 736:
+        playerX = 736
+    if playerY <= 0:
+        playerY = 0
+    elif playerY >= 436:
+        playerY = 436
+
+# tree
+    for i in range(num_of_trees):
+        treeX[i] += treeX_change[i]
+        if treeX[i] <= 0:
+            treeX_change[i] = 0.3
+        elif treeX[i] >= 736:
+            treeX_change[i] = -0.3
+        treeY[i] += treeY_change[i]
+        if treeY[i] == 600:
+            treeY_change[i] = -0.3
+
+        tree(treeX[i], treeY[i], i)
+
+    # moose
+    mooseX += mooseX_change
+
+    if mooseX <= 0:
+        mooseX_change = 0.4
+
+    # snowball
+    if snowball_state == "Fire":
+        fire_snowball(snowballX, snowballY)
+        snowballY += snowballY_change
+
+    # if we want the enemy to bounce back at boundary
+    # if mooseX <= 0:
+    #    mooseX_change = 0.4
+    # elif mooseX >= 736:
+    #   mooseX_change = -0.4
+    #    if mooseY += mooseY_change: (also set a mooseY_change = whatever distance you want it to move down after it hits boundary)
+
+    # collision
+    collision = iscollision(mooseX, mooseY, snowballX, snowballY)
+    if collision:
+        snowballX = playerX
+        snowballY = playerY
+        snowball_state = "Ready"
+        score += 100
+        print(score)
+        mooseX = -50
+        mooseY = random.randint(100, 500)
+
+    player(playerX, playerY)
+    moose(mooseX, mooseY)
+    pygame.display.update()
+
+
+
+CURRENT ERROR: 
+Traceback (most recent call last):
+  File "/Users/nickgreenberg/PycharmProjects/PyGame/main.py", line 181, in <module>
+    treeX[i] += treeX_change[i]
+IndexError: list index out of range
